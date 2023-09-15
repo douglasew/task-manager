@@ -33,6 +33,10 @@ class TaskUpdateRequest extends FormRequest
             'status' => [
                 'boolean'
             ],
+            'finish_date' => [
+                'required',
+                'date',
+            ]
         ];
     }
 
