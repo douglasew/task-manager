@@ -18,12 +18,20 @@ class TaskController extends Controller
     public function index()
     {
         //
-        $data = Task::where('user_id', auth()->id())->paginate(8);
+        $search = request('search');
+
+        if ($search) {
+            $data = Task::where('title', 'like', '%' . $search . '%')
+                ->where('user_id', auth()->id())
+                ->paginate(8);
+        } else {
+            $data = Task::where('user_id', auth()->id())->paginate(8);
+        }
 
         foreach ($data as $task) {
             $task->title = Str::of($task->title)->limit(20);
             $task->description = Str::of($task->description)->limit(20);
-            //$task->finish_date = Carbon::createFromFormat('Y-m-d', $task->finish_date)->locale('pt_BR');
+
             $task->finish_date = Carbon::createFromFormat('Y-m-d', $task->finish_date)
                 ->locale('pt_BR')
                 ->isoFormat('D [de] MMMM [de] Y');
@@ -36,7 +44,7 @@ class TaskController extends Controller
         }
 
         return view('dashboard', [
-            'tasks' => $data
+            'tasks' => $data, 'search' => $search
         ]);
     }
 
@@ -56,9 +64,7 @@ class TaskController extends Controller
     {
         //
         $request->validated();
-        $date_formatted = date('Y-m-d H:i:s', strtotime($request->finish_date));
 
-        //dd(Carbon::parse($request->finish_date)->timestamp;);
         Task::create([
             'title' => $request->title,
             'description' => $request->description,
